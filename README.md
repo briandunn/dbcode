@@ -36,9 +36,9 @@ A request made after a change to a db/code file aught to see the newest version 
 
 #### Production
 
-1. Check most recent modification time of db/code files
+1. Calculate digest of db/code hunk
 
-2. Using that timestamp, look for a schema by that name
+2. Using that digest, look for a schema by that name
 
 3. if the schema exists, set the connection's search path to use it first.
 
@@ -55,3 +55,5 @@ Old versions of the code schema can be removed from your database with
 * This is only intended to be used with postgresql. Your other db is 💩..
 
 * Booting into a raw psql connection will not configure your schema search path. Do this with the `dbcode` command.
+
+* Can't be used to manage code in schemas intended for name spacing or permission control.
