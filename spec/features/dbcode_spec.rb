@@ -44,4 +44,16 @@ describe 'dbcode' do
     expect(connection.select_one('select number from foo')).to eq 'number' => '2'
   end
 
+  specify 'concatenates files with sprockets require statements' do
+    create_view_file 'foo', <<-SQL
+    create view foo as select 1 as number
+    SQL
+
+    create_view_file 'bar', <<-SQL
+    -- require foo
+    create view bar as select * from foo
+    SQL
+
+    expect { DBCode.ensure_freshness! }.to_not raise_error
+  end
 end
