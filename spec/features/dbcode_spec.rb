@@ -1,29 +1,34 @@
 require 'active_record'
 require 'dbcode'
 
-module Rails
-  def self.root
-    Pathname(__FILE__).join('../../test_app')
-  end
-end
-
 describe 'dbcode' do
+  def database_name; 'dbcode_test' end
+  before(:all) do
+    system "dropdb #{database_name}; createdb #{database_name}"
+  end
+
   around do |test|
     ActiveRecord::Base.establish_connection(
-      adapter: 'postgresql', database: 'dbcode_test'
+      adapter: 'postgresql', database: database_name
     )
     ActiveRecord::Base.connection.transaction do
       test.call
       raise ActiveRecord::Rollback
     end
+    ActiveRecord::Base.clear_all_connections!
+  end
+
+  let(:sql_file_path) do
+    Pathname(__FILE__).join('../../test_app/db/code').tap(&:mkpath)
   end
 
   before do
-    Rails.root.join('db/code').rmtree
+    sql_file_path.rmtree
+    DBCode.sql_file_path = sql_file_path
   end
 
   def create_view_file name, contents
-    Rails.root.join('db/code/views').tap(&:mkpath).join("#{name}.sql").write contents
+    sql_file_path.join('views').tap(&:mkpath).join("#{name}.sql").write contents
   end
 
   def connection
