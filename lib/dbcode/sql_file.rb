@@ -7,11 +7,11 @@ module DBCode
     end
 
     def name
-      path.basename('.sql')
+      path.basename('.sql').to_s
     end
 
-    def dependencies
-      to_sql.scan(/^-- require (\S+)/).flatten
+    def dependency_names
+      to_sql.scan(/^\s*-- require (\S+)\s*$/).flatten
     end
 
     def to_sql

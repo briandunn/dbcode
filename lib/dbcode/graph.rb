@@ -1,4 +1,7 @@
+require 'tsort'
 module DBCode
+  LoadError = Class.new RuntimeError
+
   class Graph
     include TSort
     attr_reader :files
@@ -7,8 +10,14 @@ module DBCode
       @files = files
     end
 
-    def tsort_each_child(file, &b)
-      file.dependencies.each(&b)
+    def tsort_each_child(file, &block)
+      file.dependency_names.each do |name|
+        if dependency = files.find {|f| f.name == name }
+          block.call(dependency)
+        else
+          raise LoadError, %Q{cannot load file -- #{name}}
+        end
+      end
     end
 
     def tsort_each_node(&b)
@@ -16,7 +25,7 @@ module DBCode
     end
 
     def compile
-      tsort.reverse.map(&:to_sql).join(";\n")
+      tsort.map(&:to_sql).join(";\n")
     end
   end
 end
