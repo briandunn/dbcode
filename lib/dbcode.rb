@@ -20,7 +20,7 @@ module DBCode
   def reset_search_path(schema)
     connection.execute <<-SQL
       drop schema if exists #{schema} cascade;
-      create schema if not exists #{schema};
+      create schema #{schema};
     SQL
     #update all future connections
     ActiveRecord::Base.connection_config.merge! schema_search_path: prepend_schema_to_path(schema, connection.schema_search_path)
