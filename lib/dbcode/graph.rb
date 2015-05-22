@@ -7,21 +7,21 @@ module DBCode
     attr_reader :files
 
     def initialize(files)
-      @files = files
+      @files = files.map {|f| { f.name => f } }.reduce :merge
     end
 
     def tsort_each_child(file, &block)
       file.dependency_names.each do |name|
-        if dependency = files.find {|f| f.name == name }
-          block.call(dependency)
-        else
+        dependency = files.fetch name do
           raise LoadError, %Q{cannot load file -- #{name}}
         end
+
+        block.call dependency
       end
     end
 
     def tsort_each_node(&b)
-      files.each(&b)
+      files.values.each(&b)
     end
 
     def compile
