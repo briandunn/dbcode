@@ -18,17 +18,27 @@ module DBCode
   end
 
   def reset_search_path(schema)
-    search_path = execute("show search_path").first.fetch 'search_path'
-    execute <<-SQL
+    connection.execute <<-SQL
       drop schema if exists #{schema} cascade;
       create schema if not exists #{schema};
     SQL
-    unless search_path.split(',').first == schema
-      execute "set search_path to #{schema},#{search_path}"
+    #update all future connections
+    ActiveRecord::Base.connection_config.merge! schema_search_path: prepend_schema_to_path(schema, connection.schema_search_path)
+    #update all active connections
+    connection.pool.connections.each do |connection|
+      connection.schema_search_path = prepend_schema_to_path schema, connection.schema_search_path
     end
   end
 
-  def execute(sql)
-    ActiveRecord::Base.connection.execute sql
+  def connection
+    ActiveRecord::Base.connection
+  end
+
+  def prepend_schema_to_path(schema,path)
+    if path.split(',').include?(schema)
+      path
+    else
+      [schema,path].reject(&:blank?).join ','
+    end
   end
 end
