@@ -42,3 +42,5 @@ module DBCode
     end
   end
 end
+
+require 'dbcode/railtie' if defined? Rails
