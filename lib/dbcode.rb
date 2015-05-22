@@ -6,8 +6,15 @@ module DBCode
 
   def ensure_freshness!
     reset_search_path 'tmp'
-    file_names = Dir[sql_file_path.join('**/*.sql').expand_path]
-    execute Graph.new(file_names.sort.map(&SQLFile.method(:new))).compile
+    connection.execute graph.compile
+  end
+
+  def graph
+    Graph.new file_names.sort.map &SQLFile.method(:new)
+  end
+
+  def file_names
+    Dir[sql_file_path.join('**/*.sql').expand_path]
   end
 
   def reset_search_path(schema)
