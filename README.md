@@ -8,7 +8,7 @@ Migrations are fine for mutating table structure. Even a necessary evil given so
 
 Lately I've been taking advantage of more database features like constraints, views, and functions. Iterating on these during development via migrations is intolerable.
 
-dbcode will borrow from a similar out of process dependency synchronization mechanism in rails: the asset pipeline. In development mode any changes to a sql view file aught to be one refresh away. A test ran after a change to a sql view file aught to execute against the latest version. In a production deploy sql views can be bundled into a migration - just like pre-compiling assets.
+dbcode will borrow from a similar out of process dependency synchronization mechanism in rails: the asset pipeline. In development mode any changes to a sql view file ought to be one refresh away. A test ran after a change to a sql view file ought to execute against the latest version. In a production deploy sql views can be bundled into a migration - just like pre-compiling assets.
 
 ### Features
 
@@ -29,7 +29,7 @@ Writing drop statements or downward migrations is not necessary.  All of your co
 
 #### Test
 
-DB Code ensures that the declarations in your test database are up to date. Any time you change a `db/code` file the changes will be available on your next test run. This happens automatically for tests that boot rails. If you have a test that integrates the database, but doesn't boot rails, call `DBCode.ensure_freshness!` in a before block.
+dbcode ensures that the declarations in your test database are up to date. Any time you change a `db/code` file the changes will be available on your next test run. This happens automatically for tests that boot rails. If you have a test that integrates the database, but doesn't boot rails, call `DBCode.ensure_freshness!` in a before block.
 
 #### Development
 
