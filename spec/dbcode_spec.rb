@@ -19,7 +19,7 @@ describe 'dbcode' do
   end
 
   let(:sql_file_path) do
-    Pathname(__FILE__).join('../../test_app/db/code').tap(&:mkpath)
+    Pathname(__FILE__).join('../test_app/db/code').tap(&:mkpath)
   end
 
   before do
