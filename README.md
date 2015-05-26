@@ -29,7 +29,7 @@ Writing drop statements or downward migrations is not necessary.  All of your co
 
 #### Test
 
-DB Code ensures that the declarations in your test database are up to date. Any time you change a `db/code` file the changes will be available on your next test run. This happens automatically for tests that boot rails. If you have a test that integrates the database, but doesn't boot rails, call `DBCode.ensure_freshness!` in a before block.
+dbcode ensures that the declarations in your test database are up to date. Any time you change a `db/code` file the changes will be available on your next test run. This happens automatically for tests that boot rails. If you have a test that integrates the database, but doesn't boot rails, call `DBCode.ensure_freshness!` in a before block.
 
 #### Development
 
