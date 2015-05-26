@@ -6,7 +6,7 @@ module DBCode
     include TSort
 
     def initialize(files)
-      @files = files.map {|f| { f.name => f } }.reduce(:merge).freeze
+      @files = (files.map {|f| { f.name => f } }.reduce(:merge) || {}).freeze
     end
 
     def digest

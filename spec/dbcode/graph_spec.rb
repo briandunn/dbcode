@@ -32,4 +32,8 @@ describe DBCode::Graph do
       described_class.new([file_1]).compile
     end.to raise_error DBCode::LoadError, 'cannot load file -- file_2'
   end
+
+  it 'is empty when empty' do
+    expect(described_class.new({}).to_sql).to eq ''
+  end
 end
