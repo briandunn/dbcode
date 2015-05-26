@@ -21,13 +21,11 @@ module DBCode
     end
 
     def digest
-      comment = execute(<<-SQL).first
+      comment = connection.select_one <<-SQL
         select pg_catalog.obj_description(n.oid, 'pg_namespace') as md5
         from pg_catalog.pg_namespace n where n.nspname = '#@name'
       SQL
-      if comment
-        comment.fetch('md5') && comment.fetch('md5').match(/^dbcode_md5:(?<md5>.+)$/)[:md5]
-      end
+      comment && comment['md5'] =~ /^dbcode_md5:(.+)$/ && $1
     end
 
     def within_schema(&block)
