@@ -12,7 +12,7 @@ describe DBCode::Schema do
     it 'ensures everything in the block is in this schema' do
       allow(connection).to receive(:transaction).and_yield
       schema.within_schema do
-        expect(connection).to have_received(:schema_search_path=).once.with 'pants'
+        expect(connection).to have_received(:schema_search_path=).once.with 'pants,public'
       end
       expect(connection).to have_received(:schema_search_path=).once.with 'public'
       expect(connection).to have_received(:schema_search_path=).twice
