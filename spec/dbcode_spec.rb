@@ -61,4 +61,20 @@ describe 'dbcode' do
 
     expect { DBCode.ensure_freshness! }.to_not raise_error
   end
+
+  it 'only executes when the code is updated' do
+    create_view_file 'foo', <<-SQL
+      create view foo as select 1 as number
+    SQL
+
+    DBCode.ensure_freshness!
+
+    expect {
+      DBCode.ensure_freshness!
+    }.to_not change {
+      connection.select_one(<<-SQL).fetch('oid')
+        select oid from pg_catalog.pg_namespace where nspname = 'code';
+      SQL
+    }
+  end
 end

@@ -8,10 +8,26 @@ module DBCode
     delegate :execute, to: :connection
 
     def reset!
-      connection.execute <<-SQL
+      execute <<-SQL
         drop schema if exists #@name cascade;
         create schema #@name;
       SQL
+    end
+
+    def digest=(digest)
+      execute <<-SQL
+        comment on schema #@name is 'dbcode_md5:#{digest}'
+      SQL
+    end
+
+    def digest
+      comment = execute(<<-SQL).first
+        select pg_catalog.obj_description(n.oid, 'pg_namespace') as md5
+        from pg_catalog.pg_namespace n where n.nspname = '#@name'
+      SQL
+      if comment
+        comment.fetch('md5').match(/^dbcode_md5:(?<md5>.+)$/)[:md5]
+      end
     end
 
     def prepend_path!(config)

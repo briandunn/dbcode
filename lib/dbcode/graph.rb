@@ -4,11 +4,26 @@ module DBCode
 
   class Graph
     include TSort
-    attr_reader :files
 
     def initialize(files)
-      @files = files.map {|f| { f.name => f } }.reduce :merge
+      @files = files.map {|f| { f.name => f } }.reduce(:merge).freeze
     end
+
+    def digest
+      Digest::MD5.base64digest to_sql
+    end
+
+    def compile
+      tsort.map(&:to_sql).join(";\n")
+    end
+
+    def to_sql
+      @to_sql ||= compile
+    end
+
+    private
+
+    attr_reader :files
 
     def tsort_each_child(file, &block)
       file.dependency_names.each do |name|
@@ -22,10 +37,6 @@ module DBCode
 
     def tsort_each_node(&b)
       files.values.each(&b)
-    end
-
-    def compile
-      tsort.map(&:to_sql).join(";\n")
     end
   end
 end
