@@ -9,6 +9,7 @@ describe DBCode::Schema do
     end
 
     it 'ensures everything in the block is in this schema' do
+      allow(connection).to receive(:transaction).and_yield
       schema = described_class.new(name: 'pants', connection: connection)
       schema.within_schema do
         expect(connection).to have_received(:schema_search_path=).once.with 'pants'

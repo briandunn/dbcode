@@ -33,7 +33,7 @@ module DBCode
     def within_schema(&block)
       old_path = connection.schema_search_path
       connection.schema_search_path = name
-      block.call
+      connection.transaction(&block)
       connection.schema_search_path = old_path
     end
 
