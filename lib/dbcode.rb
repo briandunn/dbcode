@@ -3,10 +3,11 @@ module DBCode
   autoload :Schema, 'dbcode/schema'
   autoload :Graph, 'dbcode/graph'
   extend self
-  attr_accessor :sql_file_path
+  attr_accessor :sql_file_path, :code_schema_name
+  self.code_schema_name ||= 'code'
 
   def ensure_freshness!
-    code = Schema.new connection: ActiveRecord::Base.connection, name: 'code'
+    code = Schema.new connection: ActiveRecord::Base.connection, name: code_schema_name
     code.within_schema do
       unless code.digest == graph.digest
         code.reset!
