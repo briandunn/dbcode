@@ -23,37 +23,32 @@ Database code files live in a directory structure like this:
 
 Interdependency of db/code elements is expressed via magic comments:
 
-    -- require foo_view
+    -- require views/foo
 
+Writing drop statements or downward migrations is not necessary.  All of your code is kept in a separate schema that is replaced when your declaration files change. Want to migrate to a previous version? Check out that revision in your SCM and connect. In test and development mode this will just work. Production is a slightly different story: read more below.
 
 #### Test
 
-Any time rails would expose a new version of a javascript file to your tests, dbcode will ensure your view declarations are up to date. That means any time you change a `db/code` file the changes will be available on your next test run.
+DB Code ensures that the declarations in your test database are up to date. Any time you change a `db/code` file the changes will be available on your next test run. This happens automatically for tests that boot rails. If you have a test that integrates the database, but doesn't boot rails, call `DBCode.ensure_freshness!` in a before block.
 
 #### Development
 
-A request made after a change to a db/code file aught to see the newest version of the database. This could be achieved via a rack middleware that checks modification times on request start.
+A request made after a change to a `db/code` file will see the latest version of that declaration.
 
 #### Production
 
-1. Calculate digest of db/code hunk
+In production mode the automatic synchronization step is skipped. Connecting to a database that doesn't contain the latest version on the `code` schema will log a warning.
 
-2. Using that digest, look for a schema by that name
-
-3. if the schema exists, set the connection's search path to use it first.
-
-4. if it doesn't exist, create it with the contents of db/code
-
-### Cleanup
-
-Old versions of the code schema can be removed from your database with
-
-    rake dbcode:clean
+Running migrations on the production database will do the trick. Alternatively run the task `db:code:sync`
 
 ### Disclaimer
 
 * This is only intended to be used with postgresql. Your other db is 💩..
 
-* Booting into a raw psql connection will not configure your schema search path. Do this with the `dbcode` command.
+* Booting into a raw psql connection will not configure your schema search to place `code` first. Try something like this:
 
-* Can't be used to manage code in schemas intended for name spacing or permission control.
+    $ psql app_development;
+    app_development=# set search_path to code,public;
+    SET
+
+* Can't be used to manage code in schemas intended for name spacing or permission control. You'll need to use migrations to manage code that lives in schemas other than `code`.
