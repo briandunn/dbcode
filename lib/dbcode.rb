@@ -7,14 +7,14 @@ module DBCode
 
   def ensure_freshness!
     code = Schema.new connection: ActiveRecord::Base.connection, name: 'code'
-    code.prepend_path!(ActiveRecord::Base.connection_config)
-    ActiveRecord::Base.transaction do
+    code.within_schema do
       unless code.digest == graph.digest
         code.reset!
         code.execute graph.to_sql
         code.digest = graph.digest
       end
     end
+    code.append_path!(ActiveRecord::Base.connection_config)
   end
 
   def graph

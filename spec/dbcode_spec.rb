@@ -77,4 +77,18 @@ describe 'dbcode' do
       SQL
     }
   end
+
+  specify "subsequent ddl statements work go into public schema" do
+    expect(connection.schema_search_path.split(',')).to_not include 'code'
+    DBCode.ensure_freshness!
+    connection.execute <<-SQL
+    create table foos (id serial)
+    SQL
+    expect(connection.select_one(<<-SQL).fetch('nspname')).to eq 'public'
+      select nspname
+      from pg_class
+      join pg_namespace on relnamespace = pg_namespace.oid
+      where relname = 'foos'
+    SQL
+  end
 end

@@ -30,9 +30,16 @@ module DBCode
       end
     end
 
-    def prepend_path!(config)
+    def within_schema(&block)
+      old_path = connection.schema_search_path
+      connection.schema_search_path = name
+      block.call
+      connection.schema_search_path = old_path
+    end
+
+    def append_path!(config)
       #update all future connections
-      config.merge! schema_search_path: prepend_schema_to_path(connection.schema_search_path)
+      config.merge! schema_search_path: append_schema_to_path(connection.schema_search_path)
       #update all active connections
       connection.pool.connections.each do |connection|
         connection.schema_search_path = config[:schema_search_path]
@@ -41,11 +48,11 @@ module DBCode
 
     private
 
-    def prepend_schema_to_path(path)
+    def append_schema_to_path(path)
       if path.split(',').include?(name)
         path
       else
-        [name,path].reject(&:blank?).join ','
+        [path,name].reject(&:blank?).join ','
       end
     end
   end
