@@ -6,5 +6,9 @@ module DBCode
     end
 
     config.to_prepare &DBCode.method(:ensure_freshness!)
+
+    rake_tasks do
+      load 'dbcode/tasks/db_code.rake'
+    end
   end
 end
