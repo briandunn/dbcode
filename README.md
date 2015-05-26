@@ -45,10 +45,6 @@ Running migrations on the production database will do the trick. Alternatively r
 
 * This is only intended to be used with postgresql. Your other db is 💩..
 
-* Booting into a raw psql connection will not configure your schema search to place `code` first. Try something like this:
-
-    $ psql app_development;
-    app_development=# set search_path to code,public;
-    SET
+* Booting into a raw psql connection will not configure your schema search to place `code` first. Try something like this in the repl: `set search_path to code,public;`
 
 * Can't be used to manage code in schemas intended for name spacing or permission control. You'll need to use migrations to manage code that lives in schemas other than `code`.
