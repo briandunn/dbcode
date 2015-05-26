@@ -26,7 +26,7 @@ module DBCode
         from pg_catalog.pg_namespace n where n.nspname = '#@name'
       SQL
       if comment
-        comment.fetch('md5').match(/^dbcode_md5:(?<md5>.+)$/)[:md5]
+        comment.fetch('md5') && comment.fetch('md5').match(/^dbcode_md5:(?<md5>.+)$/)[:md5]
       end
     end
 
