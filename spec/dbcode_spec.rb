@@ -25,6 +25,7 @@ describe 'dbcode' do
   before do
     sql_file_path.rmtree
     DBCode.sql_file_path = sql_file_path
+    DBCode.logger.level = Logger::Severity::FATAL
   end
 
   def create_file path, contents

@@ -1,18 +1,39 @@
+require 'logger'
+
 module DBCode
   autoload :SQLFile, 'dbcode/sql_file'
   autoload :Schema, 'dbcode/schema'
   autoload :Graph, 'dbcode/graph'
   extend self
-  attr_accessor :sql_file_path, :code_schema_name
-  self.code_schema_name ||= 'code'
+
+  def code_schema_name
+    @code_schema_name || 'code'
+  end
+
+  attr_writer :code_schema_name
+
+  def sql_file_path
+    @sql_file_path or raise "Configure sql file path. eg: #{self}.#{__method__} = Rails.root"
+  end
+
+  attr_writer :sql_file_path
+
+  def logger
+    @logger ||= Logger.new(STDOUT)
+  end
+
+  attr_writer :logger
 
   def ensure_freshness!
     code = Schema.new connection: ActiveRecord::Base.connection, name: code_schema_name
     code.within_schema do
-      unless code.digest == graph.digest
+      if code.digest != graph.digest
+        logger.warn "[dbcode] Resetting schema #{code.name}"
         code.reset!
         code.execute graph.to_sql
         code.digest = graph.digest
+      else
+        logger.info "[dbcode] Schema #{code.name} is up to date"
       end
     end
     code.append_path!(ActiveRecord::Base.connection_config)

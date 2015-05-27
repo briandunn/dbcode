@@ -2,6 +2,7 @@ module DBCode
   class Railtie < Rails::Railtie
     initializer "dbcode.setup" do |app|
       DBCode.sql_file_path = app.root.join 'db/code'
+      DBCode.logger = Rails.logger
       config.watchable_dirs[DBCode.sql_file_path.to_s] = ['sql']
     end
 
