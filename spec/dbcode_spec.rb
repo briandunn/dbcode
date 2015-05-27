@@ -45,13 +45,13 @@ describe 'dbcode' do
     create_view_file 'foo', <<-SQL
       create view foo as select 1 as number
     SQL
-    DBCode.ensure_freshness!
+    DBCode.prepare
 
     expect(connection.select_one('select number from foo')).to eq 'number' => '1'
     create_view_file 'foo', <<-SQL
       create view foo as select 2 as number
     SQL
-    DBCode.ensure_freshness!
+    DBCode.prepare
     expect(connection.select_one('select number from foo')).to eq 'number' => '2'
   end
 
@@ -65,7 +65,7 @@ describe 'dbcode' do
     create view bar as select * from foo
     SQL
 
-    expect { DBCode.ensure_freshness! }.to_not raise_error
+    expect { DBCode.prepare }.to_not raise_error
   end
 
   it 'only executes when the code is updated' do
@@ -73,10 +73,10 @@ describe 'dbcode' do
       create view foo as select 1 as number
     SQL
 
-    DBCode.ensure_freshness!
+    DBCode.prepare
 
     expect {
-      DBCode.ensure_freshness!
+      DBCode.prepare
     }.to_not change {
       connection.select_one(<<-SQL).fetch('oid')
         select oid from pg_catalog.pg_namespace where nspname = 'code';
@@ -86,7 +86,7 @@ describe 'dbcode' do
 
   specify "subsequent ddl statements work go into public schema" do
     expect(connection.schema_search_path.split(',')).to_not include 'code'
-    DBCode.ensure_freshness!
+    DBCode.prepare
     connection.execute <<-SQL
     create table foos (id serial)
     SQL

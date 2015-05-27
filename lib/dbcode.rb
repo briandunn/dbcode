@@ -25,7 +25,7 @@ module DBCode
 
   attr_writer :logger
 
-  def ensure_freshness!
+  def prepare
     code = Schema.new connection: ActiveRecord::Base.connection, name: code_schema_name
     code.within_schema do
       if code.digest != graph.digest
