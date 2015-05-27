@@ -1,4 +1,3 @@
-require 'active_record'
 require 'dbcode'
 
 describe 'dbcode' do

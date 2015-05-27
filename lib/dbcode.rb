@@ -1,4 +1,5 @@
 require 'logger'
+require 'active_record'
 
 module DBCode
   autoload :SQLFile, 'dbcode/sql_file'
