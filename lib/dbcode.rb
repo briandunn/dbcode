@@ -19,11 +19,17 @@ module DBCode
   end
 
   def graph
-    Graph.new file_names.sort.map &SQLFile.method(:new)
+    Graph.new files.map &SQLFile.method(:new)
   end
 
-  def file_names
-    Dir[sql_file_path.join('**/*.sql').expand_path]
+  def files
+    Dir[sql_file_path.join('**/*.sql').expand_path].sort.map do |file_name|
+      path = Pathname(file_name)
+      {
+        name: path.relative_path_from(sql_file_path).sub(/.sql$/,'').to_s,
+        contents: path.read
+      }
+    end
   end
 end
 

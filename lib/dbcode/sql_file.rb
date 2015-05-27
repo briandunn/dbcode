@@ -1,13 +1,9 @@
 module DBCode
   class SQLFile
-    attr_reader :path
+    attr_reader :name, :contents
 
-    def initialize(path)
-      @path = Pathname(path)
-    end
-
-    def name
-      path.basename('.sql').to_s
+    def initialize(name:, contents:)
+      @name, @contents = name, contents
     end
 
     def dependency_names
@@ -15,7 +11,7 @@ module DBCode
     end
 
     def to_sql
-      @sql ||= path.read
+      @contents
     end
   end
 end

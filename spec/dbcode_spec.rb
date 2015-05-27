@@ -27,8 +27,14 @@ describe 'dbcode' do
     DBCode.sql_file_path = sql_file_path
   end
 
+  def create_file path, contents
+    path = Pathname path
+    sql_file_path.join(path.dirname)
+      .tap(&:mkpath).join("#{path.basename}.sql").write contents
+  end
+
   def create_view_file name, contents
-    sql_file_path.join('views').tap(&:mkpath).join("#{name}.sql").write contents
+    create_file Pathname('views').join(name), contents
   end
 
   def connection
@@ -55,7 +61,7 @@ describe 'dbcode' do
     SQL
 
     create_view_file 'bar', <<-SQL
-    -- require foo
+    -- require views/foo
     create view bar as select * from foo
     SQL
 
@@ -90,5 +96,10 @@ describe 'dbcode' do
       join pg_namespace on relnamespace = pg_namespace.oid
       where relname = 'foos'
     SQL
+  end
+
+  specify 'file_names is the name and the path' do
+    create_file 'functions/kill_em_all', '-- hi!'
+    expect(DBCode.files).to eq [name: 'functions/kill_em_all', contents: '-- hi!']
   end
 end
