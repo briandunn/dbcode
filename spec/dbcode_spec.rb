@@ -37,6 +37,12 @@ describe 'dbcode' do
     create_file Pathname('views').join(name), contents
   end
 
+  def schema_oid
+    (connection.select_one(<<-SQL) or {})['oid']
+      select oid from pg_catalog.pg_namespace where nspname = '#{DBCode.code_schema_name}';
+    SQL
+  end
+
   def connection
     ActiveRecord::Base.connection
   end
@@ -77,11 +83,7 @@ describe 'dbcode' do
 
     expect {
       DBCode.prepare
-    }.to_not change {
-      connection.select_one(<<-SQL).fetch('oid')
-        select oid from pg_catalog.pg_namespace where nspname = 'code';
-      SQL
-    }
+    }.to_not change { schema_oid }
   end
 
   specify "subsequent ddl statements work go into public schema" do
@@ -101,5 +103,30 @@ describe 'dbcode' do
   specify 'file_names is the name and the path' do
     create_file 'functions/kill_em_all', '-- hi!'
     expect(DBCode.files).to eq [name: 'functions/kill_em_all', contents: '-- hi!']
+  end
+
+  describe 'when there are pending migrations' do
+    before {
+      allow(ActiveRecord::Migrator).to receive(:needs_migration?) { true }
+    }
+
+    it 'does not reset out of date schemas' do
+      DBCode.prepare
+      create_view_file 'foo', <<-SQL
+        create view foo as select 1 as number
+      SQL
+      expect { DBCode.prepare }.to_not change { schema_oid }
+    end
+  end
+
+  describe 'in production mode' do
+    before { DBCode.env = 'production' }
+    it 'does not reset out of date schemas' do
+      DBCode.prepare
+      create_view_file 'foo', <<-SQL
+        create view foo as select 1 as number
+      SQL
+      expect { DBCode.prepare }.to_not change { schema_oid }
+    end
   end
 end

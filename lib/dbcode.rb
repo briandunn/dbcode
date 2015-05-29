@@ -5,6 +5,8 @@ module DBCode
   autoload :SQLFile, 'dbcode/sql_file'
   autoload :Schema, 'dbcode/schema'
   autoload :Graph, 'dbcode/graph'
+  include ActiveRecord
+
   extend self
 
   def code_schema_name
@@ -25,10 +27,24 @@ module DBCode
 
   attr_writer :logger
 
+  def env
+    @env ||= 'development'
+  end
+
+  attr_writer :env
+
   def prepare
-    code = Schema.new connection: ActiveRecord::Base.connection, name: code_schema_name
+    code = Schema.new connection: Base.connection, name: code_schema_name
+    code.append_path!(Base.connection_config)
+
+    return if Migrator.needs_migration?
+
     code.within_schema do
+
       if code.digest != graph.digest
+        if env == 'production'
+          return logger.error "[dbcode] out of date, but refusing to reset #{code.name} in production."
+        end
         logger.warn "[dbcode] Resetting schema #{code.name}"
         code.reset!
         code.execute graph.to_sql
@@ -37,7 +53,6 @@ module DBCode
         logger.info "[dbcode] Schema #{code.name} is up to date"
       end
     end
-    code.append_path!(ActiveRecord::Base.connection_config)
   end
 
   def graph
