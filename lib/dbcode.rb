@@ -40,6 +40,7 @@ module DBCode
     return if Migrator.needs_migration?
 
     code.within_schema do
+      graph = build_graph
 
       if code.digest != graph.digest
         if env == 'production'
@@ -55,7 +56,7 @@ module DBCode
     end
   end
 
-  def graph
+  def build_graph
     Graph.new files.map &SQLFile.method(:new)
   end
 
