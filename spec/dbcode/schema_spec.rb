@@ -19,6 +19,51 @@ describe DBCode::Schema do
     end
   end
 
+  describe '#append_path!' do
+    def database_name; 'dbcode_test' end
+    before(:all) do
+      system "dropdb #{database_name}; createdb #{database_name}"
+    end
+
+    around do |test|
+      ActiveRecord::Base.establish_connection(
+        adapter: 'postgresql', database: database_name, schema_search_path: schema_search_path
+      )
+      ActiveRecord::Base.connection.transaction do
+        test.call
+        raise ActiveRecord::Rollback
+      end
+      ActiveRecord::Base.clear_all_connections!
+    end
+
+    let(:connection) { ActiveRecord::Base.connection }
+    let(:schema_search_path) { 'public' }
+
+    context 'dbcode schema is not present' do
+      it 'appends to the postgres search path' do
+        expect {
+          config = connection.instance_variable_get '@config'
+          schema.append_path!(config)
+        }.to change{
+          connection.instance_variable_get('@config')[:schema_search_path]
+        }.from('public').to('public,pants')
+      end
+    end
+
+    context 'dbcode schema is already in the connection' do
+      let(:schema_search_path) { 'public,pants' }
+
+      it 'does not append to the postgres search path' do
+        expect {
+          config = connection.instance_variable_get '@config'
+          schema.append_path!(config)
+        }.not_to change{
+          connection.instance_variable_get('@config')[:schema_search_path]
+        }
+      end
+    end
+  end
+
   describe '#digest' do
     subject { schema.digest }
 

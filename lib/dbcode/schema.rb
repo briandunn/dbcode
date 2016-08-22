@@ -16,6 +16,10 @@ module DBCode
       path.join ','
     end
 
+    def include?(name)
+      path.include? name
+    end
+
     private
     attr_reader :path
 
@@ -61,8 +65,10 @@ module DBCode
     end
 
     def append_path!(config)
+      return if search_path.include? name
+
       #update all future connections
-      config.merge! schema_search_path: search_path.append(name)
+      config.merge! schema_search_path: search_path.append(name).to_s
       #update all active connections
       connection.pool.connections.each do |connection|
         connection.schema_search_path = config[:schema_search_path]
