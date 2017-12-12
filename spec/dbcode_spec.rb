@@ -53,12 +53,12 @@ describe 'dbcode' do
     SQL
     DBCode.prepare
 
-    expect(connection.select_one('select number from foo')).to eq 'number' => '1'
+    expect(connection.select_one('select number from foo')).to eq 'number' => 1
     create_view_file 'foo', <<-SQL
       create view foo as select 2 as number
     SQL
     DBCode.prepare
-    expect(connection.select_one('select number from foo')).to eq 'number' => '2'
+    expect(connection.select_one('select number from foo')).to eq 'number' => 2
   end
 
   specify 'concatenates files with sprockets require statements' do

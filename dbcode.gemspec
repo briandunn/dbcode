@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.rubygems_version = "2.4.4"
-  s.add_dependency %<activerecord>, '~> 4.2'
+  s.add_dependency %<activerecord>, '~> 5.0'
   s.add_development_dependency %<rake>, '~> 10.4'
   s.add_development_dependency %<pg>
   s.add_development_dependency %<rspec>, '~> 3.2'
