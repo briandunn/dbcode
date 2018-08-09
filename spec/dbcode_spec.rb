@@ -106,9 +106,9 @@ describe 'dbcode' do
   end
 
   describe 'when there are pending migrations' do
-    before {
-      allow(ActiveRecord::Migrator).to receive(:needs_migration?) { true }
-    }
+    before do
+      allow(ActiveRecord::Migrator).to receive(:check_pending!).and_raise(ActiveRecord::PendingMigrationError)
+    end
 
     it 'does not reset out of date schemas' do
       DBCode.prepare
