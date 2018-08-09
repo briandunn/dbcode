@@ -37,7 +37,11 @@ module DBCode
     code = Schema.new connection: Base.connection, name: code_schema_name
     code.append_path!(Base.connection_config)
 
-    return if Migrator.needs_migration?
+    begin
+      Migration.check_pending!
+    rescue PendingMigrationError
+      return
+    end
 
     code.within_schema do
       graph = build_graph
